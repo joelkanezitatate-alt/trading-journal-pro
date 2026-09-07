@@ -2810,3 +2810,211 @@ function renderCalendar(trades) {
 }
 
 
+// ============================================== //
+// PROFIL & IDENTITÉ — Ajouts                     //
+// ============================================== //
+
+let _pendingAvatar = null;
+
+function openEditProfileModal() {
+    if (!state.currentUser) return;
+
+    document.getElementById('edit-profile-name').value = state.currentUser.name || '';
+    document.getElementById('edit-profile-email').value = state.currentUser.email || '';
+
+    _pendingAvatar = state.currentUser.avatar || null;
+    refreshAvatarUploadPreview();
+
+    document.getElementById('edit-profile-message').textContent = '';
+    document.getElementById('edit-profile-message').className = 'form-message';
+    document.getElementById('edit-profile-modal').classList.add('active');
+}
+
+function closeEditProfileModal() {
+    document.getElementById('edit-profile-modal').classList.remove('active');
+    _pendingAvatar = null;
+}
+
+function handleAvatarFile(e) {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+        showToast('Image trop volumineuse (max 2 Mo).', 'error');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = ev => {
+        _pendingAvatar = ev.target.result;
+        refreshAvatarUploadPreview();
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeAvatar() {
+    _pendingAvatar = null;
+    document.getElementById('avatar-file-input').value = '';
+    refreshAvatarUploadPreview();
+}
+
+function refreshAvatarUploadPreview() {
+    const preview = document.getElementById('avatar-upload-preview');
+    const initialsEl = document.getElementById('avatar-upload-initials');
+    const removeBtn = document.getElementById('avatar-remove-btn');
+
+    const initials = (document.getElementById('edit-profile-name').value ||
+                      state.currentUser?.name || 'U')
+                      .split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    initialsEl.textContent = initials;
+
+    if (_pendingAvatar) {
+        preview.style.backgroundImage = `url("${_pendingAvatar}")`;
+        preview.classList.add('has-photo');
+        removeBtn.style.display = '';
+    } else {
+        preview.style.backgroundImage = '';
+        preview.classList.remove('has-photo');
+        removeBtn.style.display = 'none';
+    }
+}
+
+function handleEditProfile(e) {
+    e.preventDefault();
+    const newName = document.getElementById('edit-profile-name').value.trim();
+    const newEmail = document.getElementById('edit-profile-email').value.trim();
+    const msgEl = document.getElementById('edit-profile-message');
+
+    if (!newName || !newEmail) {
+        msgEl.textContent = 'Tous les champs sont obligatoires.';
+        msgEl.className = 'form-message error';
+        return;
+    }
+
+    const users = JSON.parse(localStorage.getItem('yjournal_users') || '[]');
+    const oldEmail = state.currentUser.email;
+
+    // Vérifier collision d'email
+    if (newEmail !== oldEmail && users.some(u => u.email === newEmail)) {
+        msgEl.textContent = 'Cet email est déjà utilisé.';
+        msgEl.className = 'form-message error';
+        return;
+    }
+
+    const idx = users.findIndex(u => u.email === oldEmail);
+    if (idx !== -1) {
+        users[idx].name = newName;
+        users[idx].email = newEmail;
+        users[idx].avatar = _pendingAvatar || null;
+        localStorage.setItem('yjournal_users', JSON.stringify(users));
+
+        // Migrer les comptes si l'email change
+        if (newEmail !== oldEmail) {
+            const accKey = `yjournal_accounts_${oldEmail}`;
+            const accs = localStorage.getItem(accKey);
+            if (accs) {
+                localStorage.setItem(`yjournal_accounts_${newEmail}`, accs);
+                localStorage.removeItem(accKey);
+            }
+        }
+    }
+
+    state.currentUser.name = newName;
+    state.currentUser.email = newEmail;
+    state.currentUser.avatar = _pendingAvatar || null;
+    saveState();
+
+    closeEditProfileModal();
+    renderDashboard();
+    applyUserAvatar();
+    showToast('Profil mis à jour.', 'success');
+}
+
+/**
+ * Applique la photo de profil aux avatars visibles
+ */
+function applyUserAvatar() {
+    const url = state.currentUser?.avatar;
+    const targets = [
+        document.getElementById('profile-avatar'),
+        document.getElementById('sidebar-avatar')
+    ];
+
+    targets.forEach(el => {
+        if (!el) return;
+        if (url) {
+            el.style.backgroundImage = `url("${url}")`;
+            el.classList.add('has-photo');
+        } else {
+            el.style.backgroundImage = '';
+            el.classList.remove('has-photo');
+        }
+    });
+}
+
+// Hook non-destructif sur renderDashboard existant
+const _origRenderDashboard = typeof renderDashboard === 'function' ? renderDashboard : null;
+if (_origRenderDashboard) {
+    renderDashboard = function () {
+        _origRenderDashboard.apply(this, arguments);
+        applyUserAvatar();
+    };
+}
+// ============================================== //
+// SUPPRESSION D'UN TRADE INDIVIDUEL              //
+// ============================================== //
+
+/**
+ * Affiche/masque le bouton Supprimer selon le mode
+ */
+function _updateDeleteBtnVisibility() {
+    const btn = document.getElementById('trade-delete-btn');
+    if (btn) btn.style.display = journalState.editingTradeId ? '' : 'none';
+}
+
+/**
+ * Supprime le trade en cours d'édition
+ */
+function deleteCurrentTrade() {
+    if (!journalState.editingTradeId) return;
+    if (!confirm('Supprimer définitivement ce trade ? Cette action est irréversible.')) return;
+
+    const tradeId = journalState.editingTradeId;
+    let deleted = false;
+
+    state.accounts.forEach(acc => {
+        if (!acc.trades) return;
+        const before = acc.trades.length;
+        acc.trades = acc.trades.filter(t => t.id !== tradeId);
+        if (acc.trades.length < before) {
+            deleted = true;
+            // Recalculer le solde
+            acc.currentBalance = acc.initialCapital +
+                acc.trades.reduce((s, t) => s + (t.pnl || 0), 0);
+        }
+    });
+
+    if (deleted) {
+        saveAccountsToStorage();
+        saveState();
+        closeTradeModal();
+
+        // Rafraîchir les vues actives
+        if (typeof renderTradesTable === 'function') renderTradesTable();
+        if (typeof updateJournalSummary === 'function') updateJournalSummary();
+        if (typeof renderDashboard === 'function') renderDashboard();
+        if (typeof applyEvoFilters === 'function') applyEvoFilters();
+        if (typeof applyStatsFilters === 'function') applyStatsFilters();
+
+        showToast('Trade supprimé.', 'info');
+    }
+}
+
+// Hook non-destructif sur openTradeModal pour afficher le bouton
+const _origOpenTradeModal = typeof openTradeModal === 'function' ? openTradeModal : null;
+if (_origOpenTradeModal) {
+    openTradeModal = function () {
+        _origOpenTradeModal.apply(this, arguments);
+        setTimeout(_updateDeleteBtnVisibility, 20);
+    };
+}

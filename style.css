@@ -4467,3 +4467,132 @@ a:hover {
         padding: 5px 10px;
     }
 }
+
+/* ---------- Profil : bouton edit + photo ---------- */
+.profile-info-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-edit-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--primary-light);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-edit-profile svg {
+    width: 14px;
+    height: 14px;
+}
+
+.btn-edit-profile:hover {
+    background: rgba(108, 92, 231, 0.1);
+    border-color: var(--primary);
+}
+
+/* Support image dans les avatars */
+.profile-avatar,
+.user-avatar-small {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.profile-avatar.has-photo,
+.user-avatar-small.has-photo {
+    background-image: var(--avatar-url);
+}
+
+.profile-avatar.has-photo span,
+.user-avatar-small.has-photo span {
+    display: none;
+}
+
+/* Upload zone dans le modal */
+.avatar-upload {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+}
+
+.avatar-upload-preview {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 800;
+    color: white;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+    border: 2px solid var(--border-color);
+}
+
+.avatar-upload-preview.has-photo span {
+    display: none;
+}
+
+.avatar-upload-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.btn-sm {
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+}
+
+.btn-danger-outline {
+    color: var(--accent-red) !important;
+    border-color: rgba(225, 112, 85, 0.3) !important;
+}
+
+.btn-danger-outline:hover {
+    background: rgba(225, 112, 85, 0.08) !important;
+    border-color: var(--accent-red) !important;
+}
+.btn-edit-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #1e1b4b; /* Un beau bleu foncé élégant */
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-edit-profile:hover {
+    background-color: #312e81; /* Un bleu légèrement plus clair au survol */
+}
+
+.btn-edit-profile svg {
+    width: 14px;
+    height: 14px;
+}

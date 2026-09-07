@@ -87,7 +87,7 @@
                         </svg>
                         Nom complet
                     </label>
-                    <input type="text" id="register-name" placeholder="Jean Dupont" required>
+                    <input type="text" id="register-name" placeholder="Yowel Kanezi" required>
                 </div>
                 <div class="form-group">
                     <label for="register-email">
@@ -385,9 +385,9 @@
 
                 <div class="sidebar-footer">
                     <div class="user-mini-card">
-                        <div class="user-avatar-small" id="sidebar-avatar">JD</div>
+                        <div class="user-avatar-small" id="sidebar-avatar">YK</div>
                         <div class="user-info-small">
-                            <span class="user-name-small" id="sidebar-username">Jean Dupont</span>
+                            <span class="user-name-small" id="sidebar-username">Yowel Kanezi</span>
                             <span class="user-status">
                                 <span class="status-dot"></span>
                                 En ligne
@@ -419,7 +419,7 @@
                             </svg>
                         </button>
                         <div class="header-greeting">
-                            <h1 id="greeting-text">Bonjour, Jean 👋</h1>
+                            <h1 id="greeting-text">Bonjour, Yowel 👋</h1>
                             <p id="greeting-date">Tableau de bord</p>
                         </div>
                     </div>
@@ -455,13 +455,24 @@
                                     <span class="profile-status-badge"></span>
                                 </div>
                                 <div class="profile-info">
-                                    <h2 class="profile-name" id="profile-name">Jean Dupont</h2>
-                                    <p class="profile-email" id="profile-email">jean.dupont@email.com</p>
-                                    <div class="profile-tags">
-                                        <span class="tag tag-primary">Trader</span>
-                                        <span class="tag tag-success" id="profile-member-since">Membre depuis 2024</span>
-                                    </div>
-                                </div>
+    <div class="profile-info-head">
+        <div>
+            <h2 class="profile-name" id="profile-name">Yowel Kanezi</h2>
+            <p class="profile-email" id="profile-email">yowel.kanezi@email.com</p>
+        </div>
+        <button class="btn-edit-profile" onclick="openEditProfileModal()" title="Modifier mon profil">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            Modifier
+        </button>
+    </div>
+    <div class="profile-tags">
+        <span class="tag tag-primary">Trader</span>
+        <span class="tag tag-success" id="profile-member-since">Membre depuis 2024</span>
+    </div>
+</div>
                                 <div class="profile-stats-mini">
                                     <div class="profile-stat-item">
                                         <span class="profile-stat-value" id="profile-total-trades">0</span>
@@ -980,7 +991,73 @@
     </div>
 </div>
 
-<!-- ============================================== -->
+<!-- Modal Édition Profil -->
+<div class="modal-overlay" id="edit-profile-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                Modifier mon profil
+            </h2>
+            <button class="modal-close" onclick="closeEditProfileModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <form class="modal-body" onsubmit="handleEditProfile(event)">
+
+            <!-- Photo de profil -->
+            <div class="form-group">
+                <label>Photo de profil</label>
+                <div class="avatar-upload">
+                    <div class="avatar-upload-preview" id="avatar-upload-preview">
+                        <span id="avatar-upload-initials">JD</span>
+                    </div>
+                    <div class="avatar-upload-actions">
+                        <input type="file" id="avatar-file-input" accept="image/*" class="hidden" onchange="handleAvatarFile(event)">
+                        <button type="button" class="btn-secondary btn-sm" onclick="document.getElementById('avatar-file-input').click()">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            Choisir une image
+                        </button>
+                        <button type="button" class="btn-secondary btn-sm btn-danger-outline" id="avatar-remove-btn" onclick="removeAvatar()">
+                            Retirer
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="edit-profile-name">Nom complet</label>
+                <input type="text" id="edit-profile-name" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-profile-email">Email</label>
+                <input type="email" id="edit-profile-email" required>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeEditProfileModal()">Annuler</button>
+                <button type="submit" class="btn-primary">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Enregistrer
+                </button>
+            </div>
+            <div id="edit-profile-message" class="form-message"></div>
+        </form>
+    </div>
+</div>
+
 <!-- MODAL TRADE MULTI-ÉTAPES (Ajouter AVANT la     -->
 <!-- fermeture de #dashboard-section)                -->
 <!-- ============================================== -->
@@ -1094,12 +1171,10 @@
                             <select id="trade-model">
                                 <option value="" disabled selected>Sélectionner</option>
                                 <option value="Silver Bullet">Silver Bullet</option>
-                                <option value="Turtle Soup">Turtle Soup</option>
-                                <option value="Judas Swing">Judas Swing</option>
-                                <option value="Optimal Trade Entry">Optimal Trade Entry</option>
-                                <option value="Breaker Retest">Breaker Retest</option>
-                                <option value="FVG Entry">FVG Entry</option>
-                                <option value="ICT 2022 Model">ICT 2022 Model</option>
+                                <option value="CISD">CISD (Change in State of Delivery)</option>
+                                <option value="Silver Divergence + FVG">Silver Divergence + FVG</option>
+                                <option value="Silver Divergence + IFVG">Silver Divergence + IFVG</option>
+                                <option value="Silver Divergence + BB">Silver Divergence + Breaker Block</option>
                                 <option value="Unicorn Model">Unicorn Model</option>
                                 <option value="AMD Setup">AMD Setup</option>
                                 <option value="Autre">Autre</option>
@@ -1115,7 +1190,8 @@
                                 <option value="Asian">🌏 Asian</option>
                                 <option value="London">🇬🇧 London</option>
                                 <option value="New York">🇺🇸 New York</option>
-                                <option value="London Close">🌆 London Close</option>
+                                <option value="London Close">🌆 us New York Close</option>
+                                <option value="Hors session">Hors session</option>
                             </select>
                             <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                         </div>
@@ -1239,12 +1315,10 @@
                         <button type="button" class="poi-chip" data-poi="FVG" onclick="togglePOI(this)">FVG</button>
                         <button type="button" class="poi-chip" data-poi="Order Block" onclick="togglePOI(this)">Order Block</button>
                         <button type="button" class="poi-chip" data-poi="Breaker Block" onclick="togglePOI(this)">Breaker Block</button>
-                        <button type="button" class="poi-chip" data-poi="Mitigation Block" onclick="togglePOI(this)">Mitigation Block</button>
-                        <button type="button" class="poi-chip" data-poi="Liquidity Void" onclick="togglePOI(this)">Liquidity Void</button>
-                        <button type="button" class="poi-chip" data-poi="Rejection Block" onclick="togglePOI(this)">Rejection Block</button>
-                        <button type="button" class="poi-chip" data-poi="Propulsion Block" onclick="togglePOI(this)">Propulsion Block</button>
                         <button type="button" class="poi-chip" data-poi="Equilibrium" onclick="togglePOI(this)">Equilibrium</button>
                         <button type="button" class="poi-chip" data-poi="Premium/Discount" onclick="togglePOI(this)">Premium/Discount</button>
+                        <button type="button" class="poi-chip" data-poi="IFVG" onclick="togglePOI(this)">IFVG</button>
+                        <button type="button" class="poi-chip" data-poi="BPR" onclick="togglePOI(this)">BPR</button> 
                     </div>
                 </div>
 
@@ -1403,27 +1477,34 @@
 
             <!-- Navigation modale -->
             <div class="trade-modal-nav">
-                <button type="button" class="btn-secondary" id="trade-prev-btn" onclick="tradeStepPrev()" style="visibility: hidden">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-                    Précédent
-                </button>
-                <div class="trade-step-dots">
-                    <span class="step-dot active" data-step="1"></span>
-                    <span class="step-dot" data-step="2"></span>
-                    <span class="step-dot" data-step="3"></span>
-                    <span class="step-dot" data-step="4"></span>
-                </div>
-                <button type="button" class="btn-primary" id="trade-next-btn" onclick="tradeStepNext()">
-                    Suivant
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                </button>
-                <button type="submit" class="btn-primary btn-validate hidden" id="trade-submit-btn">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                    Valider le Trade
-                </button>
-            </div>
+    <button type="button" class="btn-secondary btn-danger-outline" id="trade-delete-btn" onclick="deleteCurrentTrade()" style="display:none">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+        </svg>
+        Supprimer
+    </button>
+    <button type="button" class="btn-secondary" id="trade-prev-btn" onclick="tradeStepPrev()" style="visibility: hidden">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Précédent
+    </button>
+    <div class="trade-step-dots">
+        <span class="step-dot active" data-step="1"></span>
+        <span class="step-dot" data-step="2"></span>
+        <span class="step-dot" data-step="3"></span>
+        <span class="step-dot" data-step="4"></span>
+    </div>
+    <button type="button" class="btn-primary" id="trade-next-btn" onclick="tradeStepNext()">
+        Suivant
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <button type="submit" class="btn-primary btn-validate hidden" id="trade-submit-btn">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Valider le Trade
+    </button>
+</div>
         </form>
     </div>
 </div>
@@ -1479,7 +1560,8 @@
                         <option value="Asian">Asian</option>
                         <option value="London">London</option>
                         <option value="New York">New York AM</option>
-                        <option value="London Close">New York PM</option>
+                        <option value="New York close">New York PM</option>
+                        <option value="Hors session">Hors session</option>
                     </select>
                     <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                 </div>
