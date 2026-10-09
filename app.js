@@ -129,8 +129,19 @@ async function handleLogin(e) {
         const userDoc = await db.collection('users').doc(email).get();
 
         if (userDoc.exists && userDoc.data().password === password) {
+            if (userDoc.exists && userDoc.data().password === password) {
             state.currentUser = userDoc.data();
             showToast('Connexion réussie ! 🚀', 'success');
+
+            // Récupérer les comptes associés à cet utilisateur depuis Firestore
+            const accountsSnapshot = await db.collection('accounts').where('userEmail', '==', email).get();
+            state.accounts = [];
+            accountsSnapshot.forEach(doc => {
+                state.accounts.push({ id: doc.id, ...doc.data() });
+            });
+
+            // Sauvegarder localement et afficher le tableau de bord
+            saveState();
 
             if (state.accounts && state.accounts.length > 0) {
                 showSection('dashboard-section');
@@ -138,6 +149,8 @@ async function handleLogin(e) {
             } else {
                 showSection('create-account-section');
             }
+        }
+        
         } else {
             showFormMessage('login-message', 'Email ou mot de passe incorrect.', 'error');
         }
