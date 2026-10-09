@@ -1,3 +1,18 @@
+// Configuration Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyBPFqFepSilRozPPv...",
+  authDomain: "trading-journal-pro-f830e.firebaseapp.com",
+  projectId: "trading-journal-pro-f830e",
+  storageBucket: "trading-journal-pro-f830e.appspot.com",
+  messagingSenderId: "1095578641483",
+  appId: "1:1095578641483:web:63a320fd9ce",
+  measurementId: "G-2C2X8ETPMN"
+};
+
+// Initialisation
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 // ============================================== //
 // app.js — Y Journal                              //
 // ============================================== //
@@ -36,6 +51,37 @@ function loadState() {
     } else {
         showSection('auth-section');
     }
+    // Synchronisation en temps réel des trades depuis Firestore
+    db.collection('trades').onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+            const tradeData = { id: change.doc.id, ...change.doc.data() };
+            const accountId = tradeData.accountId;
+            
+            // Retrouver le compte concerné dans l'état local
+            const account = state.accounts.find(a => a.id === accountId);
+            if (account) {
+                if (!account.trades) account.trades = [];
+                
+                const existingIndex = account.trades.findIndex(t => t.id === tradeData.id);
+                if (change.type === "added" || change.type === "modified") {
+                    if (existingIndex !== -1) {
+                        account.trades[existingIndex] = tradeData;
+                    } else {
+                        account.trades.push(tradeData);
+                    }
+                } else if (change.type === "removed") {
+                    if (existingIndex !== -1) {
+                        account.trades.splice(existingIndex, 1);
+                    }
+                }
+                
+                // Mettre à jour l'affichage si le tableau de bord ou la vue est actif
+                if (typeof renderTradesTable === 'function') renderTradesTable();
+                if (typeof renderDashboard === 'function') renderDashboard();
+                if (typeof updateJournalSummary === 'function') updateJournalSummary();
+            }
+        });
+    });
 }
 
 function saveState() {
@@ -1333,7 +1379,20 @@ function handleTradeSubmit(e) {
         account.currentBalance = account.initialCapital + account.trades.reduce((sum, t) => sum + (t.pnl || 0), 0);
     }
 
-    saveAccountsToStorage();
+    // Sauvegarde dans Firebase Firestore au lieu du localStorage pour éviter le QuotaExceededError
+db.collection('trades').add({
+    ...trade,
+    accountId: accountId,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+})
+.then(() => {
+    console.log("Trade enregistré avec succès dans Firestore !");
+    showToast('Trade enregistré avec succès ! 🚀', 'success');
+})
+.catch((error) => {
+    console.error("Erreur lors de l'enregistrement : ", error);
+    showToast('Erreur lors de l’enregistrement cloud.', 'error');
+});
     saveState();
 
     closeTradeModal();

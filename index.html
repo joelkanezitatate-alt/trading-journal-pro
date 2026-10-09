@@ -27,7 +27,7 @@
             </div>
 
             <!-- Formulaire Connexion -->
-            <form id="login-form" class="auth-form active" onsubmit="handleLogin(event)">
+            <form id="login-form" class="auth-form active">
                 <div class="form-group">
                     <label for="login-email">
                         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2178,10 +2178,14 @@
             </div>
         </div>
     </section>
+    <!-- Firebase App (core) -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<!-- Firebase Auth -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<!-- Firebase Firestore -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-    <!-- Toast Notification -->
-    <div class="toast-container" id="toast-container"></div>
-
-    <script src="app.js"></script>
+<!-- Ton script principal -->
+<script src="app.js"></script>
 </body>
 </html>
