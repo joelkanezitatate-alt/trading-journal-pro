@@ -150,7 +150,7 @@ async function handleLogin(e) {
                 showSection('create-account-section');
             }
         }
-        
+
         } else {
             showFormMessage('login-message', 'Email ou mot de passe incorrect.', 'error');
         }
@@ -236,10 +236,11 @@ function handleLogout() {
 }
 
 // ---------- CREATE ACCOUNT ---------- //
-function handleCreateAccount(e) {
+async function handleCreateAccount(e) {
     e.preventDefault();
     const account = {
         id: Date.now().toString(),
+        userEmail: state.currentUser ? state.currentUser.email : '',
         name: document.getElementById('account-name').value.trim(),
         broker: document.getElementById('broker').value.trim(),
         type: document.getElementById('account-type').value,
@@ -256,13 +257,21 @@ function handleCreateAccount(e) {
         return;
     }
 
-    state.accounts.push(account);
-    saveAccountsToStorage();
-    saveState();
+    try {
+        // Enregistrer le compte dans Firestore
+        await db.collection('accounts').doc(account.id).set(account);
 
-    showToast(`Compte "${account.name}" connecté ! ✅`, 'success');
-    showSection('dashboard-section');
-    renderDashboard();
+        state.accounts.push(account);
+        saveAccountsToStorage();
+        saveState();
+
+        showToast(`Compte "${account.name}" connecté ! ✅`, 'success');
+        showSection('dashboard-section');
+        renderDashboard();
+    } catch (error) {
+        console.error("Erreur lors de la création du compte :", error);
+        showToast("Erreur lors de la sauvegarde du compte", "error");
+    }
 }
 
 function handleModalCreateAccount(e) {
