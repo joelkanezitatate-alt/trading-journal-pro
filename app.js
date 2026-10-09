@@ -120,13 +120,10 @@ async function handleLogin(e) {
     }
 
     try {
-        const userDocRef = doc(db, 'users', email);
-        const userSnap = await getDoc(userDocRef);
+        const userDoc = await db.collection('users').doc(email).get();
 
-        if (userSnap.exists() && userSnap.data().password === password) {
-            state.currentUser = userSnap.data();
-            
-            // Charger les comptes depuis Firestore si nécessaire
+        if (userDoc.exists && userDoc.data().password === password) {
+            state.currentUser = userDoc.data();
             showToast('Connexion réussie ! 🚀', 'success');
 
             if (state.accounts && state.accounts.length > 0) {
@@ -173,10 +170,10 @@ async function handleRegister(e) {
     }
 
     try {
-        const userDocRef = doc(db, 'users', email);
-        const userSnap = await getDoc(userDocRef);
+        const userRef = db.collection('users').doc(email);
+        const userSnap = await userRef.get();
 
-        if (userSnap.exists()) {
+        if (userSnap.exists) {
             showFormMessage('register-message', 'Cet email est déjà utilisé.', 'error');
             return;
         }
@@ -188,7 +185,7 @@ async function handleRegister(e) {
             createdAt: new Date().toISOString()
         };
 
-        await setDoc(userDocRef, newUser);
+        await userRef.set(newUser);
 
         state.currentUser = newUser;
         state.accounts = [];
