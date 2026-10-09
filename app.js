@@ -109,7 +109,7 @@ function switchAuthTab(tab) {
 }
 
 // ---------- AUTH HANDLERS ---------- //
-function handleLogin(e) {
+async function handleLogin(e) {
     e.preventDefault();
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
@@ -119,30 +119,32 @@ function handleLogin(e) {
         return;
     }
 
-    const users = JSON.parse(localStorage.getItem('yjournal_users') || '[]');
-    const user = users.find(u => u.email === email && u.password === password);
+    try {
+        const userDocRef = doc(db, 'users', email);
+        const userSnap = await getDoc(userDocRef);
 
-    if (user) {
-        state.currentUser = user;
+        if (userSnap.exists() && userSnap.data().password === password) {
+            state.currentUser = userSnap.data();
+            
+            // Charger les comptes depuis Firestore si nécessaire
+            showToast('Connexion réussie ! 🚀', 'success');
 
-        const userAccounts = JSON.parse(localStorage.getItem(`yjournal_accounts_${user.email}`) || '[]');
-        state.accounts = userAccounts;
-
-        saveState();
-        showToast('Connexion réussie ! 🎉', 'success');
-
-        if (state.accounts.length > 0) {
-            showSection('dashboard-section');
-            renderDashboard();
+            if (state.accounts && state.accounts.length > 0) {
+                showSection('dashboard-section');
+                renderDashboard();
+            } else {
+                showSection('create-account-section');
+            }
         } else {
-            showSection('create-account-section');
+            showFormMessage('login-message', 'Email ou mot de passe incorrect.', 'error');
         }
-    } else {
-        showFormMessage('login-message', 'Email ou mot de passe incorrect.', 'error');
+    } catch (error) {
+        console.error("Erreur de connexion :", error);
+        showFormMessage('login-message', 'Erreur de connexion au serveur.', 'error');
     }
 }
 
-function handleRegister(e) {
+async function handleRegister(e) {
     e.preventDefault();
     const name = document.getElementById('register-name').value.trim();
     const email = document.getElementById('register-email').value.trim();
@@ -170,29 +172,34 @@ function handleRegister(e) {
         return;
     }
 
-    const users = JSON.parse(localStorage.getItem('yjournal_users') || '[]');
+    try {
+        const userDocRef = doc(db, 'users', email);
+        const userSnap = await getDoc(userDocRef);
 
-    if (users.find(u => u.email === email)) {
-        showFormMessage('register-message', 'Cet email est déjà utilisé.', 'error');
-        return;
+        if (userSnap.exists()) {
+            showFormMessage('register-message', 'Cet email est déjà utilisé.', 'error');
+            return;
+        }
+
+        const newUser = {
+            name,
+            email,
+            password,
+            createdAt: new Date().toISOString()
+        };
+
+        await setDoc(userDocRef, newUser);
+
+        state.currentUser = newUser;
+        state.accounts = [];
+        saveState();
+
+        showToast('Compte créé avec succès ! 🚀', 'success');
+        showSection('create-account-section');
+    } catch (error) {
+        console.error("Erreur lors de l'inscription :", error);
+        showFormMessage('register-message', 'Erreur lors de la création du compte.', 'error');
     }
-
-    const user = {
-        name,
-        email,
-        password,
-        createdAt: new Date().toISOString()
-    };
-
-    users.push(user);
-    localStorage.setItem('yjournal_users', JSON.stringify(users));
-
-    state.currentUser = user;
-    state.accounts = [];
-    saveState();
-
-    showToast('Compte créé avec succès ! 🚀', 'success');
-    showSection('create-account-section');
 }
 
 function handleLogout() {
