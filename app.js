@@ -31,7 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setupPasswordStrength();
     updateGreeting();
 
-    document.getElementById('currency').addEventListener('change', updateCurrencySuffix);
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) loginForm.addEventListener('submit', handleLogin);
+
+    const registerForm = document.getElementById('register-form');
+    if (registerForm) registerForm.addEventListener('submit', handleRegister);
+
+    document.getElementById('currency')?.addEventListener('change', updateCurrencySuffix);
 });
 
 function loadState() {
